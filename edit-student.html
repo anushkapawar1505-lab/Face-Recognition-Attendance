@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Edit Student</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#f4f6f9;
+    padding:40px;
+    text-align:center;
+}
+
+input{
+    padding:10px;
+    margin:10px;
+    width:250px;
+}
+
+button{
+    padding:10px 20px;
+    background:#1e90ff;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+table{
+    margin:auto;
+    margin-top:20px;
+    border-collapse:collapse;
+    width:60%;
+}
+
+th,td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+}
+
+th{
+    background:#1e3a8a;
+    color:white;
+}
+
+.back-btn{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    padding:10px 15px;
+    background:#1e90ff;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.back-btn:hover{
+    background:#187bcd;
+}
+
+/* 🔥 PROFESSIONAL TOAST */
+#toast{
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    min-width: 250px;
+    background: #28a745;
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-weight: 500;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.4s ease;
+    z-index: 9999;
+}
+#toast.show{
+    opacity: 1;
+    transform: translateY(0);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Edit Student</h2>
+
+<input type="text" id="roll" placeholder="Roll Number">
+<input type="text" id="name" placeholder="Student Name">
+
+<br>
+
+<button onclick="updateStudent()">Update Student</button>
+
+<table>
+
+<tr>
+<th>Roll</th>
+<th>Name</th>
+<th>Edit</th>
+</tr>
+
+<tbody id="studentTable"></tbody>
+
+</table>
+
+<button class="back-btn" onclick="goBack()">⬅ Back</button>
+
+<!-- 🔥 TOAST -->
+<div id="toast"></div>
+
+<script>
+
+function goBack(){
+    window.history.back();
+}
+
+let students = JSON.parse(localStorage.getItem("students")) || [];
+let editIndex = -1;
+
+// 🔥 TOAST FUNCTION
+function showToast(message){
+    const toast = document.getElementById("toast");
+    toast.innerText = message;
+    toast.classList.add("show");
+
+    setTimeout(()=>{
+        toast.classList.remove("show");
+    }, 2500);
+}
+
+function loadStudents(){
+
+    let html="";
+
+    students.forEach((s,i)=>{
+        html+=`
+        <tr>
+            <td>${s.roll}</td>
+            <td>${s.name}</td>
+            <td>
+                <button onclick="editStudent(${i})">Edit</button>
+            </td>
+        </tr>
+        `;
+    });
+
+    document.getElementById("studentTable").innerHTML=html;
+
+}
+
+function editStudent(i){
+
+    editIndex=i;
+
+    document.getElementById("roll").value=students[i].roll;
+    document.getElementById("name").value=students[i].name;
+
+}
+
+function updateStudent(){
+
+    let roll=document.getElementById("roll").value;
+    let name=document.getElementById("name").value;
+
+    if(editIndex>=0){
+
+        students[editIndex]={roll,name};
+
+        localStorage.setItem("students",JSON.stringify(students));
+
+        // ❌ OLD: alert("Student Updated");
+        // ✅ NEW PROFESSIONAL
+        showToast("Student Updated Successfully ✅");
+
+        document.getElementById("roll").value="";
+        document.getElementById("name").value="";
+
+        loadStudents();
+
+    }
+
+}
+
+loadStudents();
+
+</script>
+
+</body>
+</html>

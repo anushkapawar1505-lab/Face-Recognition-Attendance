@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Take Attendance</title>
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: #eef2f7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+h2 { color: #2f80ed; }
+
+.video-container {
+    position: relative;
+    width: 320px;
+    height: 240px;
+    border-radius: 10px;
+    border: 4px solid #2f80ed;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+video {
+    width: 100%;
+    height: 100%;
+}
+
+#scanLine {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: limegreen;
+    box-shadow: 0 0 12px limegreen;
+    animation: scanDown 2s linear infinite;
+    display: none;
+}
+
+@keyframes scanDown {
+    0% { top: 0%; }
+    100% { top: 100%; }
+}
+
+button {
+    background: #2f80ed;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+#msg { font-weight: bold; margin-top: 10px; }
+
+.manual-add {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.manual-add input {
+    padding: 6px;
+}
+
+/* 🔥 TOAST */
+#toast{
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    min-width: 250px;
+    background: #28a745;
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-weight: 500;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.4s ease;
+    z-index: 9999;
+}
+#toast.show{
+    opacity: 1;
+    transform: translateY(0);
+}
+</style>
+</head>
+
+<body>
+
+<h2>Take Attendance</h2>
+
+<div class="video-container">
+    <video id="video" autoplay muted></video>
+    <div id="scanLine"></div>
+</div>
+
+<p id="msg"></p>
+
+<div>
+    <button onclick="startCamera()">Start Camera</button>
+    <button onclick="scanFace()">Scan Face</button>
+    <button onclick="stopCamera()">Stop Camera</button>
+</div>
+
+<div class="manual-add">
+    <input type="text" id="manualRoll" placeholder="Enter Roll">
+    <input type="text" id="manualName" placeholder="Enter Name">
+    <button onclick="manualAddNotDetected()">Add Not Detected</button>
+</div>
+
+<!-- 🔥 TOAST -->
+<div id="toast"></div>
+
+<script>
+const video = document.getElementById("video");
+const msg = document.getElementById("msg");
+const scanLine = document.getElementById("scanLine");
+
+let modelsLoaded = false;
+let stream = null;
+
+// 🔥 TOAST
+function showToast(message){
+    const toast = document.getElementById("toast");
+    toast.innerText = message;
+    toast.classList.add("show");
+
+    setTimeout(()=>{
+        toast.classList.remove("show");
+    }, 2500);
+}
+
+// SCAN LINE
+function startScanLine(){ scanLine.style.display = "block"; }
+function stopScanLine(){ scanLine.style.display = "none"; }
+
+// LOAD MODELS
+async function loadModels() {
+    if(modelsLoaded) return true;
+    try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri('./models');
+        await faceapi.nets.faceLandmark68Net.loadFromUri('./models');
+        await faceapi.nets.faceRecognitionNet.loadFromUri('./models');
+        modelsLoaded = true;
+        msg.innerText = "Models Loaded ✅";
+        return true;
+    } catch {
+        msg.innerText = "Model Load Error ❌";
+        return false;
+    }
+}
+
+// START CAMERA
+async function startCamera() {
+    const ok = await loadModels();
+    if(!ok) return;
+
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({video:true});
+        video.srcObject = stream;
+    } catch {
+        msg.innerText = "Camera Permission Denied ❌";
+    }
+}
+
+// STOP CAMERA
+function stopCamera() {
+    if(stream){
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+        msg.innerText = "Camera Stopped ⛔";
+        stopScanLine();
+    }
+}
+
+// DATE
+function getToday(){
+    return new Date().toISOString().split('T')[0];
+}
+
+// SCAN FACE
+async function scanFace() {
+
+    let students = JSON.parse(localStorage.getItem("students")) || [];
+    let attendance = JSON.parse(localStorage.getItem("attendance")) || [];
+    let today = getToday();
+
+    if(students.length === 0){
+        msg.innerText = "No Students Found ❌";
+        return;
+    }
+
+    startScanLine();
+
+    const detection = await faceapi
+        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+
+    stopScanLine();
+
+    if (!detection) {
+        msg.innerText = "Face Not Detected ❌";
+        return;
+    }
+
+    const labeledDescriptors = students.map(s => {
+        if(!s.descriptor || s.descriptor.length !== 128) return null;
+        return new faceapi.LabeledFaceDescriptors(
+            s.name,
+            [new Float32Array(s.descriptor)]
+        );
+    }).filter(x => x !== null);
+
+    if(labeledDescriptors.length === 0){
+        msg.innerText = "No Face Registered ❌";
+        return;
+    }
+
+    const matcher = new faceapi.FaceMatcher(labeledDescriptors, 0.4);
+    const result = matcher.findBestMatch(detection.descriptor);
+
+    if (result.label === "unknown") {
+        msg.innerText = "Face Not Registered ❌";
+        return;
+    }
+
+    let student = students.find(s => s.name === result.label);
+
+    if(!student){
+        msg.innerText = "Student Not Found ❌";
+        return;
+    }
+
+    let already = attendance.find(a => a.roll == student.roll && a.date == today);
+
+    if(already){
+        msg.innerText = student.name + " Already Marked ⚠️";
+        showToast(student.name + " already marked ⚠️");
+        return;
+    }
+
+    attendance.push({
+        roll: student.roll,
+        name: student.name,
+        date: today
+    });
+
+    localStorage.setItem("attendance", JSON.stringify(attendance));
+
+    msg.innerText = student.name + " Marked Present ✅";
+    showToast(student.name + " marked present ✅");
+}
+
+// MANUAL ADD
+function manualAddNotDetected() {
+    const roll = document.getElementById("manualRoll").value.trim();
+    const name = document.getElementById("manualName").value.trim();
+
+    if (!roll || !name) {
+        showToast("Enter Roll & Name ⚠️");
+        return;
+    }
+
+    let notDetected = JSON.parse(localStorage.getItem("notDetected")) || [];
+
+    if(notDetected.some(s => s.roll == roll)){
+        showToast("Already Added ⚠️");
+        return;
+    }
+
+    notDetected.push({ roll, name });
+
+    localStorage.setItem("notDetected", JSON.stringify(notDetected));
+
+    showToast("Saved as Not Detected ✅");
+
+    document.getElementById("manualRoll").value = "";
+    document.getElementById("manualName").value = "";
+}
+</script>
+
+</body>
+</html>

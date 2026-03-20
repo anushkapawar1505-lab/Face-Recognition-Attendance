@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance Report | Smart Attendance</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+body { font-family: 'Roboto', sans-serif; display:flex; flex-direction: column; align-items:center; padding:30px 20px; background:#f4f6f9; }
+h2 { color:#0f1b4c; margin-bottom:25px; }
+label { font-weight:500; margin-right:10px; }
+input[type="date"] { padding:10px; border-radius:6px; border:1px solid #ccc; margin-bottom:20px; }
+
+button { padding:10px 20px; margin:10px 5px; border:none; border-radius:8px; font-size:16px; cursor:pointer; }
+button:hover { transform:translateY(-2px); }
+
+#showReportBtn { background:#1e90ff; color:white; }
+#downloadBtn { background:#28a745; color:white; }
+
+table { margin:20px auto; border-collapse:collapse; width:80%; max-width:700px; background:#fff; border-radius:10px; overflow:hidden; }
+th, td { padding:12px 15px; text-align:center; }
+th { background:#1e3a8a; color:white; }
+
+tr:nth-child(even) { background:#f9f9f9; }
+tr:hover { background:#e6f0ff; }
+
+.status-present { color:green; font-weight:bold; }
+.status-absent { color:red; font-weight:bold; }
+
+.back-btn {
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    padding:10px 15px;
+    background:#1e90ff;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Attendance Report</h2>
+
+<div>
+    <label>Select Date:</label>
+    <input type="date" id="date">
+    <button id="showReportBtn" onclick="loadReport()">Show Report</button>
+</div>
+
+<div>
+    <button id="downloadBtn" onclick="downloadReport()">Download Attendance Report</button>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Roll</th>
+            <th>Name</th>
+            <th>Date</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody id="reportTable"></tbody>
+</table>
+
+<button class="back-btn" onclick="goBack()">⬅ Back</button>
+
+<script>
+function goBack(){ window.history.back(); }
+
+// today date
+function getToday(){
+    return new Date().toISOString().split('T')[0];
+}
+
+// 🔥 IMPORTANT: remove duplicates
+function getUniqueAttendance(attendance){
+    let map = {};
+    attendance.forEach(a => {
+        map[a.roll + "_" + a.date] = a; // unique key
+    });
+    return Object.values(map);
+}
+
+// Convert YYYY-MM-DD to MM/DD/YYYY for Excel
+function formatDateForExcel(dateStr){
+    let parts = dateStr.split('-'); // ["2026","03","20"]
+    return `${parts[1]}/${parts[2]}/${parts[0]}`; // "03/20/2026"
+}
+
+// LOAD REPORT
+function loadReport(){
+    let students = JSON.parse(localStorage.getItem("students")) || [];
+    let attendance = JSON.parse(localStorage.getItem("attendance")) || [];
+
+    attendance = getUniqueAttendance(attendance);
+
+    let selectedDate = document.getElementById("date").value || getToday();
+
+    let html = "";
+
+    students.forEach(student => {
+
+        let present = attendance.find(a => 
+            a.roll == student.roll && a.date == selectedDate
+        );
+
+        html += `<tr>
+                    <td>${student.roll}</td>
+                    <td>${student.name}</td>
+                    <td>${selectedDate}</td>
+                    <td class="${present ? 'status-present':'status-absent'}">
+                        ${present ? 'Present' : 'Absent'}
+                    </td>
+                 </tr>`;
+    });
+
+    document.getElementById("reportTable").innerHTML = html;
+}
+
+// DOWNLOAD CSV
+function downloadReport(){
+    let students = JSON.parse(localStorage.getItem("students")) || [];
+    let attendance = JSON.parse(localStorage.getItem("attendance")) || [];
+
+    attendance = getUniqueAttendance(attendance);
+
+    let selectedDate = document.getElementById("date").value || getToday();
+    let excelDate = formatDateForExcel(selectedDate); // ✅ Excel-friendly
+
+    let csv = "Roll,Name,Date,Status\n";
+
+    students.forEach(student => {
+        let present = attendance.find(a => 
+            a.roll == student.roll && a.date == selectedDate
+        );
+
+        let status = present ? "Present" : "Absent";
+
+        csv += `${student.roll},${student.name},"${excelDate}",${status}\n`;
+    });
+
+    let blob = new Blob([csv], {type:"text/csv"});
+    let link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `attendance_${selectedDate}.csv`;
+    link.click();
+}
+
+// AUTO LOAD + AUTO DATE SET
+window.onload = function(){
+    document.getElementById("date").value = getToday();
+    loadReport();
+};
+</script>
+
+</body>
+</html>

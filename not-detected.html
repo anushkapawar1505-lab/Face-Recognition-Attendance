@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Not Detected Students | Smart Attendance</title>
+
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #f4f6f9;
+    padding: 40px;
+}
+
+h2 {
+    color: #0f1b4c;
+    margin-bottom: 10px;
+}
+
+#msg {
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+table {
+    margin: auto;
+    border-collapse: collapse;
+    width: 70%;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background: #1e3a8a;
+    color: white;
+}
+
+tr:nth-child(even) { background: #f9f9f9; }
+tr:hover { background: #e6f0ff; }
+
+/* Buttons */
+.btn {
+    padding: 10px 15px;
+    margin: 10px 5px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+}
+
+.clear-btn { background: #dc3545; }
+.clear-btn:hover { background: #b52a37; }
+
+.back-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #1e90ff;
+}
+
+.back-btn:hover {
+    background: #187bcd;
+}
+
+/* 🔥 TOAST */
+#toast{
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    min-width: 250px;
+    background: #28a745;
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-weight: 500;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.4s ease;
+    z-index: 9999;
+}
+#toast.show{
+    opacity: 1;
+    transform: translateY(0);
+}
+</style>
+</head>
+
+<body>
+
+<h2>Not Detected Students</h2>
+<p id="msg">Students who were not recognized during attendance:</p>
+
+<button class="btn clear-btn" onclick="clearAll()">Clear All</button>
+
+<table>
+    <thead>
+        <tr>
+            <th>Roll</th>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody id="table"></tbody>
+</table>
+
+<button class="btn back-btn" onclick="window.history.back()">⬅ Back</button>
+
+<!-- 🔥 TOAST -->
+<div id="toast"></div>
+
+<script>
+
+// 🔥 TOAST FUNCTION
+function showToast(message){
+    const toast = document.getElementById("toast");
+    toast.innerText = message;
+    toast.classList.add("show");
+
+    setTimeout(()=>{
+        toast.classList.remove("show");
+    }, 2500);
+}
+
+// ✅ LOAD DATA
+function loadNotDetected() {
+    const notDetected = JSON.parse(localStorage.getItem("notDetected")) || [];
+
+    let html = "";
+
+    const unique = [];
+    const seen = new Set();
+
+    notDetected.forEach(s => {
+        if (!seen.has(s.roll)) {
+            seen.add(s.roll);
+            unique.push(s);
+        }
+    });
+
+    unique.forEach(s => {
+        html += `<tr>
+                    <td>${s.roll}</td>
+                    <td>${s.name}</td>
+                 </tr>`;
+    });
+
+    if (unique.length === 0) {
+        document.getElementById("table").innerHTML =
+            `<tr><td colspan="2">No students found ✅</td></tr>`;
+    } else {
+        document.getElementById("table").innerHTML = html;
+    }
+}
+
+// ✅ CLEAR ALL (NO confirm → TOAST)
+function clearAll(){
+    localStorage.removeItem("notDetected");
+    loadNotDetected();
+    showToast("All Not Detected Students Cleared 🗑️");
+}
+
+// auto load
+loadNotDetected();
+
+</script>
+
+</body>
+</html>

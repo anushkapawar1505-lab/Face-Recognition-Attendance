@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Face Recognition System | Dashboard</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+body { margin:0; font-family:'Roboto',sans-serif; background:#f4f6f9; display:flex; }
+.sidebar { width:230px; background:#0f1b4c; color:white; height:100vh; padding:20px; }
+.logo { font-size:22px; font-weight:bold; margin-bottom:5px; }
+.small-text { font-size:12px; color:#ccc; margin-bottom:30px; }
+.sidebar a { display:block; color:white; text-decoration:none; padding:10px; margin-bottom:10px; border-radius:5px; font-size:15px; transition:0.2s; }
+.sidebar a i { margin-right:10px; }
+.sidebar a:hover { background:#1a2f8f; }
+.main { flex:1; padding:30px; }
+.cards { display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px; }
+.card { padding:20px; border-radius:10px; color:white; text-align:center; width:170px; }
+.blue {background:#1a2f8f;} .green {background:#28a745;} .red {background:#dc3545;}
+.orange {background:#f0ad4e;} .darkblue {background:#0f1b4c;}
+button { padding:10px 20px; border:none; background:#1e90ff; color:white; border-radius:5px; cursor:pointer; }
+
+.table-box { max-height:150px; overflow:hidden; transition:0.5s; margin-top:10px; border:1px solid #ccc; border-radius:8px; background:white; }
+table { width:100%; border-collapse:collapse; }
+th, td { border:1px solid #ddd; padding:10px; text-align:center; }
+th { background:#0f1b4c; color:white; }
+
+/* 🔥 TOAST */
+#toast{
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    min-width: 250px;
+    background: #28a745;
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-weight: 500;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.4s ease;
+    z-index: 9999;
+}
+#toast.show{
+    opacity: 1;
+    transform: translateY(0);
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <div class="logo"><i class="fa-solid fa-robot"></i> Face Recognition</div>
+    <div class="small-text">Smart Attendance</div>
+
+    <a href="dashboard.html"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+    <a href="add-student.html"><i class="fa-solid fa-user-plus"></i> Add Student</a>
+    <a href="view-student.html"><i class="fa-solid fa-users"></i> View Student</a>
+    <a href="edit-student.html"><i class="fa-solid fa-user-pen"></i> Edit Student</a>
+    <a href="face-register.html"><i class="fa-solid fa-face-smile"></i> Face Register</a>
+    <a href="take-attendance.html"><i class="fa-solid fa-camera"></i> Take Attendance</a>
+    <a href="not-detected.html"><i class="fa-solid fa-triangle-exclamation"></i> Not Detected</a>
+    <a href="attendance-report.html"><i class="fa-solid fa-file-lines"></i> Attendance Report</a>
+    <a href="delete-student.html"><i class="fa-solid fa-user-xmark"></i> Delete Student</a>
+    <a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+    <a href="login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+</div>
+
+<div class="main">
+<div class="cards">
+    <div class="card blue"><h3>Total Students</h3><h1 id="totalStudents">0</h1></div>
+    <div class="card green"><h3>Present Today</h3><h1 id="presentToday">0</h1></div>
+    <div class="card red"><h3>Absent Today</h3><h1 id="absentToday">0</h1></div>
+    <div class="card orange"><h3>Detected</h3><h1 id="detected">0</h1></div>
+    <div class="card darkblue"><h3>Not Detected</h3><h1 id="notDetected">0</h1></div>
+</div>
+
+<button onclick="toggleTable()">Manual Attendance</button>
+
+<div class="table-box" id="tableBox">
+    <table>
+        <tr>
+            <th>Roll</th>
+            <th>Name</th>
+            <th>Present</th>
+            <th>Absent</th>
+        </tr>
+        <tbody id="studentList"></tbody>
+    </table>
+    <br>
+    <button onclick="saveAttendance()">Save Attendance</button>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let students = JSON.parse(localStorage.getItem("students")) || [];
+
+// TOAST
+function showToast(message){
+    const toast = document.getElementById("toast");
+    toast.innerText = message;
+    toast.classList.add("show");
+    setTimeout(()=>{ toast.classList.remove("show"); }, 2500);
+}
+
+// DATE TIME
+function getDateTime(){
+    let now = new Date();
+    let month = String(now.getMonth()+1).padStart(2,'0');
+    let day = String(now.getDate()).padStart(2,'0');
+    let year = now.getFullYear();
+    let date = `${year}-${month}-${day}`;
+    let excelDate = `${month}/${day}/${year}`;
+    let time = String(now.getHours()).padStart(2,'0') + ":" + String(now.getMinutes()).padStart(2,'0') + ":" + String(now.getSeconds()).padStart(2,'0');
+    return {date, excelDate, time};
+}
+
+// LOAD TABLE
+function loadStudentList(){
+    let html = "";
+    students.forEach((s,i)=>{
+        html += `<tr>
+            <td>${s.roll}</td>
+            <td>${s.name}</td>
+            <td><input type="checkbox" id="p${i}" onclick="markPresent(${i})"></td>
+            <td><input type="checkbox" id="a${i}" onclick="markAbsent(${i})"></td>
+        </tr>`;
+    });
+    document.getElementById("studentList").innerHTML = html;
+}
+
+function markPresent(i){ document.getElementById("a"+i).checked = false; }
+function markAbsent(i){ document.getElementById("p"+i).checked = false; }
+
+function toggleTable(){
+    let box = document.getElementById("tableBox");
+    box.style.maxHeight = box.style.maxHeight === "600px" ? "150px" : "600px";
+}
+
+// ✅ FINAL SAVE FUNCTION (TOAST + CSV)
+function saveAttendance(){
+    let attendance = JSON.parse(localStorage.getItem("attendance")) || [];
+    let csvData = [["Roll","Name","Date","Time","Status"]];
+
+    students.forEach((s,i)=>{
+        let isPresent = document.getElementById("p"+i).checked;
+        let dt = getDateTime();
+
+        attendance = attendance.filter(a => !(a.roll == s.roll && a.date === dt.date));
+
+        attendance.push({
+            roll: s.roll,
+            name: s.name,
+            date: dt.date,
+            time: dt.time,
+            status: isPresent ? "Present" : "Absent"
+        });
+
+        csvData.push([s.roll, s.name, dt.excelDate, dt.time, isPresent?"Present":"Absent"]);
+    });
+
+    localStorage.setItem("attendance", JSON.stringify(attendance));
+
+    // CSV DOWNLOAD
+    let csvContent = "data:text/csv;charset=utf-8," + csvData.map(e=>e.join(",")).join("\n");
+    let link = document.createElement("a");
+    link.href = encodeURI(csvContent);
+    link.download = `attendance_${getDateTime().excelDate}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showToast("Attendance Saved & Downloaded ✅");
+    updateDashboard();
+}
+
+// DASHBOARD
+function updateDashboard(){
+    let attendance = JSON.parse(localStorage.getItem("attendance")) || [];
+    let today = getDateTime().date;
+
+    let todayAttendance = attendance.filter(a => a.date === today);
+
+    let map = new Map();
+    todayAttendance.forEach(a => map.set(a.roll, a));
+
+    let unique = Array.from(map.values());
+
+    let total = students.length;
+    let present = unique.filter(a => a.status === "Present").length;
+    let absent = total - present;
+
+    document.getElementById("totalStudents").innerText = total;
+    document.getElementById("presentToday").innerText = present;
+    document.getElementById("absentToday").innerText = absent;
+    document.getElementById("detected").innerText = present;
+    document.getElementById("notDetected").innerText = absent;
+}
+
+window.addEventListener("focus", updateDashboard);
+setInterval(updateDashboard, 2000);
+
+loadStudentList();
+updateDashboard();
+</script>
+
+</body>
+</html>

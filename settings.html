@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Settings</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+body {
+    margin:0;
+    font-family:Arial;
+    display:flex;
+    background:#f4f6f9;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width:230px;
+    background:#0f1b4c;
+    color:white;
+    height:100vh;
+    padding:20px;
+}
+
+.sidebar a {
+    display:block;
+    color:white;
+    text-decoration:none;
+    padding:10px;
+    margin-bottom:10px;
+    border-radius:5px;
+}
+
+.sidebar a:hover { background:#1a2f8f; }
+
+/* MAIN */
+.main {
+    flex:1;
+    padding:40px;
+    text-align:center;
+}
+
+input {
+    padding:10px;
+    width:250px;
+    margin:10px;
+    border-radius:5px;
+    border:1px solid #ccc;
+}
+
+button {
+    padding:10px 20px;
+    background:#1e90ff;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    margin:5px;
+}
+
+button:hover { background:#1864c0; }
+
+.logout-btn { background:#ff4757; }
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <h2>Face Recognition</h2>
+
+    <a href="dashboard.html">Dashboard</a>
+    <a href="add-student.html">Add Student</a>
+    <a href="view-student.html">View Student</a>
+    <a href="edit-student.html">Edit Student</a>
+    <a href="face-register.html">Face Register</a>
+    <a href="take-attendance.html">Take Attendance</a>
+    <a href="not-detected.html">Not Detected</a>
+    <a href="attendance-report.html">Attendance Report</a>
+    <a href="delete-student.html">Delete Student</a>
+    <a href="settings.html">Settings</a>
+    <a href="login.html">Logout</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<h2>Settings</h2>
+
+<h3>Change Admin Name</h3>
+<input type="text" id="adminName" placeholder="Enter new admin name">
+<br>
+<button onclick="saveAdmin()">Save Name</button>
+
+<h3>Change Password</h3>
+<input type="password" id="newPassword" placeholder="Enter new password">
+<br>
+<button onclick="changePassword()">Change Password</button>
+
+</div>
+
+<script>
+window.onload = function(){
+    document.getElementById("adminName").value = localStorage.getItem("adminName") || "";
+}
+
+function saveAdmin(){
+    let name = document.getElementById("adminName").value.trim();
+    if(name==""){ alert("Enter Name"); return; }
+    localStorage.setItem("adminName",name);
+    alert("Saved ✅");
+}
+
+function changePassword(){
+    let pass = document.getElementById("newPassword").value.trim();
+    if(pass==""){ alert("Enter Password"); return; }
+    localStorage.setItem("adminPassword",pass);
+    alert("Password Changed ✅");
+}
+</script>
+
+</body>
+</html>
