@@ -13,18 +13,18 @@
   font-family:Arial,sans-serif;
 }
 
+html, body{
+  height:100%;
+}
+
 body{
-  height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
 
-  /* fallback color + correct image */
-  background: #0f2027;
-  background-image: url("./images/bg.jpeg");
+  /* ✅ FIXED MOBILE BACKGROUND */
+  background: url("images/bg.jpeg") no-repeat center center;
   background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
 }
 
 /* GLASS RECTANGLE BOX */
