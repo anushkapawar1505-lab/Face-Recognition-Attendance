@@ -2,9 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Edit Student</title>
 
 <style>
+
+/*  MOBILE FIX GLOBAL */
+html, body{
+    width:100%;
+    overflow-x:hidden;
+}
 
 body{
     font-family:Arial;
@@ -13,10 +20,12 @@ body{
     text-align:center;
 }
 
+/*  INPUT RESPONSIVE */
 input{
     padding:10px;
     margin:10px;
     width:250px;
+    max-width:90%;
 }
 
 button{
@@ -28,11 +37,18 @@ button{
     cursor:pointer;
 }
 
+/* TABLE SCROLL FIX */
+.table-box{
+    width:100%;
+    overflow-x:auto;
+}
+
 table{
     margin:auto;
     margin-top:20px;
     border-collapse:collapse;
     width:60%;
+    min-width:300px;
 }
 
 th,td{
@@ -62,7 +78,22 @@ th{
     background:#187bcd;
 }
 
-/* 🔥 PROFESSIONAL TOAST */
+/*  MOBILE MEDIA */
+@media(max-width:768px){
+    body{
+        padding:15px;
+    }
+
+    table{
+        width:100%;
+    }
+
+    input{
+        width:90%;
+    }
+}
+
+/*  TOAST */
 #toast{
     position: fixed;
     bottom: 25px;
@@ -99,8 +130,9 @@ th{
 
 <button onclick="updateStudent()">Update Student</button>
 
+<!-- WRAP TABLE -->
+<div class="table-box">
 <table>
-
 <tr>
 <th>Roll</th>
 <th>Name</th>
@@ -110,10 +142,10 @@ th{
 <tbody id="studentTable"></tbody>
 
 </table>
+</div>
 
 <button class="back-btn" onclick="goBack()">⬅ Back</button>
 
-<!-- 🔥 TOAST -->
 <div id="toast"></div>
 
 <script>
@@ -125,7 +157,6 @@ function goBack(){
 let students = JSON.parse(localStorage.getItem("students")) || [];
 let editIndex = -1;
 
-// 🔥 TOAST FUNCTION
 function showToast(message){
     const toast = document.getElementById("toast");
     toast.innerText = message;
@@ -157,12 +188,9 @@ function loadStudents(){
 }
 
 function editStudent(i){
-
     editIndex=i;
-
     document.getElementById("roll").value=students[i].roll;
     document.getElementById("name").value=students[i].name;
-
 }
 
 function updateStudent(){
@@ -176,17 +204,13 @@ function updateStudent(){
 
         localStorage.setItem("students",JSON.stringify(students));
 
-        // ❌ OLD: alert("Student Updated");
-        // ✅ NEW PROFESSIONAL
         showToast("Student Updated Successfully ✅");
 
         document.getElementById("roll").value="";
         document.getElementById("name").value="";
 
         loadStudents();
-
     }
-
 }
 
 loadStudents();
