@@ -10,23 +10,73 @@
 
 <style>
 body { margin:0; font-family:'Roboto',sans-serif; background:#f4f6f9; display:flex; }
-.sidebar { width:230px; background:#0f1b4c; color:white; height:100vh; padding:20px; }
+
+/* MENU BUTTON */
+.menu-btn{
+  display:none;
+  position:fixed;
+  top:15px;
+  left:15px;
+  background:#0f1b4c;
+  color:white;
+  border:none;
+  padding:10px 12px;
+  border-radius:6px;
+  z-index:1100;
+}
+
+.sidebar { width:230px; background:#0f1b4c; color:white; height:100vh; padding:20px; transition:0.3s; }
 .logo { font-size:22px; font-weight:bold; margin-bottom:5px; }
 .small-text { font-size:12px; color:#ccc; margin-bottom:30px; }
-.sidebar a { display:block; color:white; text-decoration:none; padding:10px; margin-bottom:10px; border-radius:5px; font-size:15px; transition:0.2s; }
+
+.sidebar a { display:block; color:white; text-decoration:none; padding:10px; margin-bottom:10px; border-radius:5px; font-size:15px; }
 .sidebar a i { margin-right:10px; }
 .sidebar a:hover { background:#1a2f8f; }
+
 .main { flex:1; padding:30px; }
-.cards { display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px; }
-.card { padding:20px; border-radius:10px; color:white; text-align:center; width:170px; }
-.blue {background:#1a2f8f;} .green {background:#28a745;} .red {background:#dc3545;}
-.orange {background:#f0ad4e;} .darkblue {background:#0f1b4c;}
+
+/* CARDS */
+.cards { 
+  display:grid; 
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); 
+  gap:15px; 
+  margin-bottom:20px; 
+}
+
+.card { padding:20px; border-radius:10px; color:white; text-align:center; }
+.blue {background:#1a2f8f;} 
+.green {background:#28a745;} 
+.red {background:#dc3545;}
+.orange {background:#f0ad4e;} 
+.darkblue {background:#0f1b4c;}
+
 button { padding:10px 20px; border:none; background:#1e90ff; color:white; border-radius:5px; cursor:pointer; }
 
 .table-box { max-height:150px; overflow:hidden; transition:0.5s; margin-top:10px; border:1px solid #ccc; border-radius:8px; background:white; }
 table { width:100%; border-collapse:collapse; }
 th, td { border:1px solid #ddd; padding:10px; text-align:center; }
 th { background:#0f1b4c; color:white; }
+
+/* MOBILE */
+@media(max-width:768px){
+  .menu-btn{ display:block; }
+
+  .sidebar{
+    position:fixed;
+    left:-250px;
+    top:0;
+    z-index:1000;
+  }
+
+  .sidebar.active{
+    left:0;
+  }
+
+  .main{
+    width:100%;
+    padding:15px;
+  }
+}
 
 #toast{
     position: fixed;
@@ -53,6 +103,8 @@ th { background:#0f1b4c; color:white; }
 
 <body>
 
+<button class="menu-btn" onclick="toggleMenu()">☰</button>
+
 <div class="sidebar">
     <div class="logo"><i class="fa-solid fa-robot"></i> Face Recognition</div>
     <div class="small-text">Smart Attendance</div>
@@ -68,7 +120,6 @@ th { background:#0f1b4c; color:white; }
     <a href="delete-student.html"><i class="fa-solid fa-user-xmark"></i> Delete Student</a>
     <a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
 
-    <!-- 🔥 FIXED LOGOUT -->
     <a href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
 </div>
 
@@ -103,13 +154,15 @@ th { background:#0f1b4c; color:white; }
 <script>
 let students = JSON.parse(localStorage.getItem("students")) || [];
 
-// 🔥 LOGOUT FUNCTION
+function toggleMenu(){
+    document.querySelector(".sidebar").classList.toggle("active");
+}
+
 function logout(){
     localStorage.removeItem("adminLoggedIn");
     window.location.href = "index.html";
 }
 
-// TOAST
 function showToast(message){
     const toast = document.getElementById("toast");
     toast.innerText = message;
@@ -117,7 +170,6 @@ function showToast(message){
     setTimeout(()=>{ toast.classList.remove("show"); }, 2500);
 }
 
-// DATE TIME
 function getDateTime(){
     let now = new Date();
     let month = String(now.getMonth()+1).padStart(2,'0');
@@ -129,11 +181,11 @@ function getDateTime(){
     return {date, excelDate, time};
 }
 
-// LOAD TABLE
 function loadStudentList(){
     let html = "";
     students.forEach((s,i)=>{
-        html += `<tr>
+        html += `
+        <tr>
             <td>${s.roll}</td>
             <td>${s.name}</td>
             <td><input type="checkbox" id="p${i}" onclick="markPresent(${i})"></td>
@@ -151,7 +203,6 @@ function toggleTable(){
     box.style.maxHeight = box.style.maxHeight === "600px" ? "150px" : "600px";
 }
 
-// SAVE
 function saveAttendance(){
     let attendance = JSON.parse(localStorage.getItem("attendance")) || [];
     let csvData = [["Roll","Name","Date","Time","Status"]];
@@ -187,7 +238,6 @@ function saveAttendance(){
     updateDashboard();
 }
 
-// DASHBOARD
 function updateDashboard(){
     let attendance = JSON.parse(localStorage.getItem("attendance")) || [];
     let today = getDateTime().date;
