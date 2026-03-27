@@ -2,9 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Not Detected Students | Smart Attendance</title>
 
 <style>
+
+/*  GLOBAL FIX */
+html, body{
+    width:100%;
+    overflow-x:hidden;
+}
+
 body {
     font-family: Arial;
     text-align: center;
@@ -22,10 +30,17 @@ h2 {
     font-weight: bold;
 }
 
+/*  TABLE SCROLL FIX */
+.table-box{
+    width:100%;
+    overflow-x:auto;
+}
+
 table {
     margin: auto;
     border-collapse: collapse;
     width: 70%;
+    min-width:300px;
     background: white;
     border-radius: 10px;
     overflow: hidden;
@@ -69,7 +84,18 @@ tr:hover { background: #e6f0ff; }
     background: #187bcd;
 }
 
-/* 🔥 TOAST */
+/*  MOBILE FIX */
+@media(max-width:768px){
+    body{
+        padding:15px;
+    }
+
+    table{
+        width:100%;
+    }
+}
+
+/*  TOAST */
 #toast{
     position: fixed;
     bottom: 25px;
@@ -90,6 +116,7 @@ tr:hover { background: #e6f0ff; }
     opacity: 1;
     transform: translateY(0);
 }
+
 </style>
 </head>
 
@@ -100,6 +127,8 @@ tr:hover { background: #e6f0ff; }
 
 <button class="btn clear-btn" onclick="clearAll()">Clear All</button>
 
+<!-- WRAP TABLE -->
+<div class="table-box">
 <table>
     <thead>
         <tr>
@@ -109,15 +138,14 @@ tr:hover { background: #e6f0ff; }
     </thead>
     <tbody id="table"></tbody>
 </table>
+</div>
 
 <button class="btn back-btn" onclick="window.history.back()">⬅ Back</button>
 
-<!-- 🔥 TOAST -->
 <div id="toast"></div>
 
 <script>
 
-// 🔥 TOAST FUNCTION
 function showToast(message){
     const toast = document.getElementById("toast");
     toast.innerText = message;
@@ -128,7 +156,6 @@ function showToast(message){
     }, 2500);
 }
 
-// ✅ LOAD DATA
 function loadNotDetected() {
     const notDetected = JSON.parse(localStorage.getItem("notDetected")) || [];
 
@@ -159,14 +186,12 @@ function loadNotDetected() {
     }
 }
 
-// ✅ CLEAR ALL (NO confirm → TOAST)
 function clearAll(){
     localStorage.removeItem("notDetected");
     loadNotDetected();
     showToast("All Not Detected Students Cleared 🗑️");
 }
 
-// auto load
 loadNotDetected();
 
 </script>
