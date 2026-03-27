@@ -21,10 +21,23 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
+  position:relative;
 
-  /* ✅ FIXED MOBILE BACKGROUND */
+  /* ✅ BACKGROUND FIX */
   background: url("images/bg.jpeg") no-repeat center center;
   background-size: cover;
+}
+
+/* ✅ DARK OVERLAY (mobile + laptop same look) */
+body::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.5);
+  z-index:0;
 }
 
 /* GLASS RECTANGLE BOX */
@@ -44,6 +57,10 @@ body{
   text-align:center;
 
   transition:0.4s;
+
+  /* ✅ ensure above overlay */
+  position:relative;
+  z-index:1;
 }
 
 .login-box:hover{
@@ -104,6 +121,14 @@ body{
 .login-box button:hover{
   transform:scale(1.05);
   background:linear-gradient(45deg,#0059c9,#0094cc);
+}
+
+/* ✅ MOBILE RESPONSIVE */
+@media(max-width:500px){
+  .login-box{
+    width:90%;
+    padding:30px 20px;
+  }
 }
 </style>
 
