@@ -28,7 +28,6 @@ table { width:100%; border-collapse:collapse; }
 th, td { border:1px solid #ddd; padding:10px; text-align:center; }
 th { background:#0f1b4c; color:white; }
 
-/* 🔥 TOAST */
 #toast{
     position: fixed;
     bottom: 25px;
@@ -68,7 +67,9 @@ th { background:#0f1b4c; color:white; }
     <a href="attendance-report.html"><i class="fa-solid fa-file-lines"></i> Attendance Report</a>
     <a href="delete-student.html"><i class="fa-solid fa-user-xmark"></i> Delete Student</a>
     <a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
-    <a href="login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+
+    <!-- 🔥 FIXED LOGOUT -->
+    <a href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
 </div>
 
 <div class="main">
@@ -101,6 +102,12 @@ th { background:#0f1b4c; color:white; }
 
 <script>
 let students = JSON.parse(localStorage.getItem("students")) || [];
+
+// 🔥 LOGOUT FUNCTION
+function logout(){
+    localStorage.removeItem("adminLoggedIn");
+    window.location.href = "index.html";
+}
 
 // TOAST
 function showToast(message){
@@ -144,7 +151,7 @@ function toggleTable(){
     box.style.maxHeight = box.style.maxHeight === "600px" ? "150px" : "600px";
 }
 
-// ✅ FINAL SAVE FUNCTION (TOAST + CSV)
+// SAVE
 function saveAttendance(){
     let attendance = JSON.parse(localStorage.getItem("attendance")) || [];
     let csvData = [["Roll","Name","Date","Time","Status"]];
@@ -168,7 +175,6 @@ function saveAttendance(){
 
     localStorage.setItem("attendance", JSON.stringify(attendance));
 
-    // CSV DOWNLOAD
     let csvContent = "data:text/csv;charset=utf-8," + csvData.map(e=>e.join(",")).join("\n");
     let link = document.createElement("a");
     link.href = encodeURI(csvContent);
