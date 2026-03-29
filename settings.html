@@ -62,19 +62,17 @@ button {
 
 button:hover { background:#1864c0; }
 
-/*  BACK BUTTON */
+/* BACK BUTTON (FIXED REMOVED) */
 .back-btn{
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    background:#ff4757;
+    background:#1e90ff;
+    margin-top:20px;
 }
 
 .back-btn:hover{
-    background:#e84118;
+    background:#1864c0;
 }
 
-/*  MOBILE FIX */
+/* MOBILE FIX */
 @media(max-width:768px){
 
     body{
@@ -147,10 +145,10 @@ button:hover { background:#1864c0; }
 <br>
 <button onclick="changePassword()">Change Password</button>
 
-</div>
-
-<!--  BACK BUTTON -->
+<!-- ✅ BACK BUTTON (INSIDE MAIN) -->
 <button class="back-btn" onclick="window.history.back()">⬅ Back</button>
+
+</div>
 
 <script>
 window.onload = function(){
