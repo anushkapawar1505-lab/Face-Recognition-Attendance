@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Take Attendance</title>
+
 <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
 <style>
 body {
     margin: 0;
-    padding: 0;
+    padding: 15px;
     font-family: Arial, sans-serif;
     background: #eef2f7;
     display: flex;
@@ -16,14 +18,17 @@ body {
     align-items: center;
     min-height: 100vh;
     flex-direction: column;
+    text-align:center;
 }
 
 h2 { color: #2f80ed; }
 
+/* 🔥 VIDEO FIX */
 .video-container {
     position: relative;
-    width: 320px;
-    height: 240px;
+    width: 100%;
+    max-width: 320px;
+    height: 220px;
     border-radius: 10px;
     border: 4px solid #2f80ed;
     overflow: hidden;
@@ -33,8 +38,10 @@ h2 { color: #2f80ed; }
 video {
     width: 100%;
     height: 100%;
+    object-fit: cover;
 }
 
+/* SCAN LINE */
 #scanLine {
     position: absolute;
     top: 0;
@@ -42,7 +49,6 @@ video {
     width: 100%;
     height: 3px;
     background: limegreen;
-    box-shadow: 0 0 12px limegreen;
     animation: scanDown 2s linear infinite;
     display: none;
 }
@@ -52,6 +58,7 @@ video {
     100% { top: 100%; }
 }
 
+/* BUTTON */
 button {
     background: #2f80ed;
     color: #fff;
@@ -62,16 +69,22 @@ button {
     cursor: pointer;
 }
 
+button:hover { background:#1864c0; }
+
 #msg { font-weight: bold; margin-top: 10px; }
 
+/* 🔥 MANUAL FIX */
 .manual-add {
     margin-top: 20px;
     display: flex;
+    flex-direction: column;
     gap: 10px;
+    align-items:center;
 }
 
 .manual-add input {
-    padding: 6px;
+    padding: 10px;
+    width: 90%;
 }
 
 /* 🔥 TOAST */
@@ -84,8 +97,6 @@ button {
     color: #fff;
     padding: 14px 20px;
     border-radius: 10px;
-    font-weight: 500;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     opacity: 0;
     transform: translateY(50px);
     transition: all 0.4s ease;
@@ -94,6 +105,25 @@ button {
 #toast.show{
     opacity: 1;
     transform: translateY(0);
+}
+
+/* 🔥 BACK BUTTON */
+.back-btn{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    background:#1e90ff;
+}
+
+.back-btn:hover{
+    background:#187bcd;
+}
+
+/* 🔥 MOBILE EXTRA */
+@media(max-width:500px){
+    button{
+        width:90%;
+    }
 }
 </style>
 </head>
@@ -121,7 +151,10 @@ button {
     <button onclick="manualAddNotDetected()">Add Not Detected</button>
 </div>
 
-<!-- 🔥 TOAST -->
+<!-- 🔥 BACK BUTTON -->
+<button class="back-btn" onclick="window.history.back()">⬅ Back</button>
+
+<!-- TOAST -->
 <div id="toast"></div>
 
 <script>
@@ -132,22 +165,16 @@ const scanLine = document.getElementById("scanLine");
 let modelsLoaded = false;
 let stream = null;
 
-// 🔥 TOAST
 function showToast(message){
     const toast = document.getElementById("toast");
     toast.innerText = message;
     toast.classList.add("show");
-
-    setTimeout(()=>{
-        toast.classList.remove("show");
-    }, 2500);
+    setTimeout(()=> toast.classList.remove("show"), 2500);
 }
 
-// SCAN LINE
 function startScanLine(){ scanLine.style.display = "block"; }
 function stopScanLine(){ scanLine.style.display = "none"; }
 
-// LOAD MODELS
 async function loadModels() {
     if(modelsLoaded) return true;
     try {
@@ -163,7 +190,6 @@ async function loadModels() {
     }
 }
 
-// START CAMERA
 async function startCamera() {
     const ok = await loadModels();
     if(!ok) return;
@@ -176,7 +202,6 @@ async function startCamera() {
     }
 }
 
-// STOP CAMERA
 function stopCamera() {
     if(stream){
         stream.getTracks().forEach(t => t.stop());
@@ -186,12 +211,10 @@ function stopCamera() {
     }
 }
 
-// DATE
 function getToday(){
     return new Date().toISOString().split('T')[0];
 }
 
-// SCAN FACE
 async function scanFace() {
 
     let students = JSON.parse(localStorage.getItem("students")) || [];
@@ -265,7 +288,6 @@ async function scanFace() {
     showToast(student.name + " marked present ✅");
 }
 
-// MANUAL ADD
 function manualAddNotDetected() {
     const roll = document.getElementById("manualRoll").value.trim();
     const name = document.getElementById("manualName").value.trim();
