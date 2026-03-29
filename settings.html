@@ -62,9 +62,19 @@ button {
 
 button:hover { background:#1864c0; }
 
-.logout-btn { background:#ff4757; }
+/*  BACK BUTTON */
+.back-btn{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    background:#ff4757;
+}
 
-/* 🔥 MOBILE FIX */
+.back-btn:hover{
+    background:#e84118;
+}
+
+/*  MOBILE FIX */
 @media(max-width:768px){
 
     body{
@@ -138,6 +148,9 @@ button:hover { background:#1864c0; }
 <button onclick="changePassword()">Change Password</button>
 
 </div>
+
+<!--  BACK BUTTON -->
+<button class="back-btn" onclick="window.history.back()">⬅ Back</button>
 
 <script>
 window.onload = function(){
