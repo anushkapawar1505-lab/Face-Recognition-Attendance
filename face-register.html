@@ -2,32 +2,45 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Register Student Face</title>
+
 <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
 <style>
-body { margin:0; padding:0; font-family:Arial; background:#eef2f7; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+body {
+    margin:0;
+    padding:15px;
+    font-family:Arial;
+    background:#eef2f7;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
 
+/* 🔥 CONTAINER FIX */
 .container {
     background:#fff;
-    padding:30px 40px;
+    padding:25px 20px;
     border-radius:15px;
     box-shadow:0 10px 30px rgba(0,0,0,0.2);
     text-align:center;
-    width:400px;
+    width:100%;
+    max-width:400px;
 }
 
 h2 { color:#2f80ed; margin-bottom:20px; }
 
 input {
-    width:80%;
+    width:90%;
     padding:10px;
     margin:8px 0;
     border-radius:6px;
     border:1px solid #ccc;
-    font-size:15px;
 }
 
+/* BUTTON */
 button {
     background:#2f80ed;
     color:#fff;
@@ -40,10 +53,11 @@ button {
 
 button:hover { background:#1864c0; }
 
+/* 🔥 VIDEO FIX */
 .video-container {
     position:relative;
     width:100%;
-    height:250px;
+    height:220px;
     border-radius:12px;
     border:4px solid #2f80ed;
     margin-top:15px;
@@ -53,8 +67,10 @@ button:hover { background:#1864c0; }
 video {
     width:100%;
     height:100%;
+    object-fit:cover;
 }
 
+/* SCAN LINE */
 #scanLine {
     position:absolute;
     top:0;
@@ -62,7 +78,6 @@ video {
     width:100%;
     height:3px;
     background:limegreen;
-    box-shadow:0 0 12px limegreen;
     animation: scanDown 2s linear infinite;
     display:none;
 }
@@ -91,8 +106,6 @@ video {
     color: #fff;
     padding: 14px 20px;
     border-radius: 10px;
-    font-weight: 500;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     opacity: 0;
     transform: translateY(50px);
     transition: all 0.4s ease;
@@ -103,6 +116,32 @@ video {
     transform: translateY(0);
 }
 
+/* 🔥 BACK BUTTON (OUTSIDE BOX) */
+.back-btn{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    background:#1e90ff;
+}
+
+.back-btn:hover{
+    background:#187bcd;
+}
+
+/* 🔥 MOBILE EXTRA */
+@media(max-width:500px){
+    body{
+        padding:10px;
+    }
+
+    .video-container{
+        height:200px;
+    }
+
+    button{
+        width:90%;
+    }
+}
 </style>
 </head>
 
@@ -116,7 +155,6 @@ video {
 
     <button onclick="startRegister()">Start Scan</button>
     <button onclick="stopCamera()">Stop Camera</button>
-    <button onclick="goBack()">Back</button>
 
     <div class="video-container">
         <video id="video" autoplay muted></video>
@@ -126,7 +164,10 @@ video {
     <p id="msg"></p>
 </div>
 
-<!-- 🔥 TOAST -->
+<!-- 🔥 BACK BUTTON -->
+<button class="back-btn" onclick="goBack()">⬅ Back</button>
+
+<!-- TOAST -->
 <div id="toast"></div>
 
 <script>
@@ -137,18 +178,13 @@ const scanLine = document.getElementById("scanLine");
 let modelsLoaded = false;
 let currentStream = null;
 
-// 🔥 TOAST FUNCTION
 function showToast(message){
     const toast = document.getElementById("toast");
     toast.innerText = message;
     toast.classList.add("show");
-
-    setTimeout(()=>{
-        toast.classList.remove("show");
-    }, 2500);
+    setTimeout(()=> toast.classList.remove("show"), 2500);
 }
 
-// LOAD MODELS
 async function loadModelsOnce(){
     if(modelsLoaded) return true;
     try{
@@ -166,13 +202,12 @@ async function loadModelsOnce(){
     }
 }
 
-// START CAMERA
 async function startCamera(){
     try{
         currentStream = await navigator.mediaDevices.getUserMedia({ video:true });
         video.srcObject = currentStream;
 
-        await new Promise(resolve => {
+        await new Promise(resolve=>{
             video.onloadedmetadata = ()=>{
                 video.play();
                 resolve();
@@ -187,7 +222,6 @@ async function startCamera(){
     }
 }
 
-// STOP CAMERA
 function stopCamera(){
     if(currentStream){
         currentStream.getTracks().forEach(track=>track.stop());
@@ -198,16 +232,13 @@ function stopCamera(){
     }
 }
 
-// BACK
 function goBack(){
     window.history.back();
 }
 
-// SCAN LINE
 function startScanLine(){ scanLine.style.display = "block"; }
 function stopScanLine(){ scanLine.style.display = "none"; }
 
-// MAIN REGISTER
 async function startRegister(){
 
     const ok = await loadModelsOnce();

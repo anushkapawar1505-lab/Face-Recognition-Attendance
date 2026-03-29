@@ -17,18 +17,18 @@ html, body{
   height:100%;
 }
 
+/* 🔥 FINAL BACKGROUND FIX */
 body{
   display:flex;
   justify-content:center;
   align-items:center;
   position:relative;
 
-  /* ✅ BACKGROUND FIX */
-  background: url("images/bg.jpeg") no-repeat center center;
+  background: url("images/bg.jpeg") no-repeat center center fixed;
   background-size: cover;
 }
 
-/* ✅ DARK OVERLAY (mobile + laptop same look) */
+/* 🔥 DARK OVERLAY */
 body::before{
   content:"";
   position:absolute;
@@ -40,7 +40,7 @@ body::before{
   z-index:0;
 }
 
-/* GLASS RECTANGLE BOX */
+/* 🔥 LOGIN BOX */
 .login-box{
   width:400px;
   padding:50px 40px;
@@ -57,8 +57,6 @@ body::before{
   text-align:center;
 
   transition:0.4s;
-
-  /* ✅ ensure above overlay */
   position:relative;
   z-index:1;
 }
@@ -71,7 +69,6 @@ body::before{
 .login-box h2{
   margin-bottom:30px;
   font-size:30px;
-  letter-spacing:1px;
 }
 
 /* INPUTS */
@@ -79,24 +76,15 @@ body::before{
   width:100%;
   padding:14px;
   margin:12px 0;
-
   border:none;
   border-radius:10px;
   outline:none;
-
   background:rgba(255,255,255,0.2);
   color:white;
-  font-size:15px;
-
-  transition:0.3s;
 }
 
 .login-box input::placeholder{
   color:#ddd;
-}
-
-.login-box input:focus{
-  background:rgba(255,255,255,0.3);
 }
 
 /* BUTTON */
@@ -104,30 +92,24 @@ body::before{
   width:100%;
   padding:14px;
   margin-top:20px;
-
   border:none;
   border-radius:10px;
-
   background:linear-gradient(45deg,#0072ff,#00c6ff);
   color:white;
-
   cursor:pointer;
   font-weight:bold;
-  font-size:16px;
-
-  transition:0.3s;
 }
 
-.login-box button:hover{
-  transform:scale(1.05);
-  background:linear-gradient(45deg,#0059c9,#0094cc);
-}
-
-/* ✅ MOBILE RESPONSIVE */
+/* 🔥 MOBILE FIX EXTRA */
 @media(max-width:500px){
   .login-box{
     width:90%;
     padding:30px 20px;
+  }
+
+  body{
+    background-position: center;
+    background-size: cover;
   }
 }
 </style>
@@ -146,7 +128,6 @@ body::before{
 </div>
 
 <script>
-// Default credentials
 if(!localStorage.getItem("adminName")) localStorage.setItem("adminName","admin");
 if(!localStorage.getItem("adminPassword")) localStorage.setItem("adminPassword","1234");
 
