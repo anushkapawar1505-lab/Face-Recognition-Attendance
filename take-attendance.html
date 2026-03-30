@@ -23,7 +23,6 @@ body {
 
 h2 { color: #2f80ed; }
 
-/* 🔥 VIDEO FIX */
 .video-container {
     position: relative;
     width: 100%;
@@ -41,7 +40,6 @@ video {
     object-fit: cover;
 }
 
-/* SCAN LINE */
 #scanLine {
     position: absolute;
     top: 0;
@@ -58,7 +56,6 @@ video {
     100% { top: 100%; }
 }
 
-/* BUTTON */
 button {
     background: #2f80ed;
     color: #fff;
@@ -73,7 +70,6 @@ button:hover { background:#1864c0; }
 
 #msg { font-weight: bold; margin-top: 10px; }
 
-/* 🔥 MANUAL FIX */
 .manual-add {
     margin-top: 20px;
     display: flex;
@@ -87,7 +83,6 @@ button:hover { background:#1864c0; }
     width: 90%;
 }
 
-/* 🔥 TOAST */
 #toast{
     position: fixed;
     bottom: 25px;
@@ -107,7 +102,6 @@ button:hover { background:#1864c0; }
     transform: translateY(0);
 }
 
-/* 🔥 BACK BUTTON */
 .back-btn{
     position:fixed;
     bottom:20px;
@@ -119,7 +113,6 @@ button:hover { background:#1864c0; }
     background:#187bcd;
 }
 
-/* 🔥 MOBILE EXTRA */
 @media(max-width:500px){
     button{
         width:90%;
@@ -151,10 +144,8 @@ button:hover { background:#1864c0; }
     <button onclick="manualAddNotDetected()">Add Not Detected</button>
 </div>
 
-<!-- 🔥 BACK BUTTON -->
 <button class="back-btn" onclick="window.history.back()">⬅ Back</button>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
 <script>
@@ -276,10 +267,12 @@ async function scanFace() {
         return;
     }
 
+    // 🔥 FIX DONE HERE
     attendance.push({
         roll: student.roll,
         name: student.name,
-        date: today
+        date: today,
+        status: "Present"
     });
 
     localStorage.setItem("attendance", JSON.stringify(attendance));
@@ -304,7 +297,12 @@ function manualAddNotDetected() {
         return;
     }
 
-    notDetected.push({ roll, name });
+    // 🔥 FIX HERE ALSO
+    notDetected.push({ 
+        roll, 
+        name,
+        status: "Absent"
+    });
 
     localStorage.setItem("notDetected", JSON.stringify(notDetected));
 

@@ -11,7 +11,6 @@
 <style>
 body { margin:0; font-family:'Roboto',sans-serif; background:#f4f6f9; display:flex; }
 
-/* MENU BUTTON */
 .menu-btn{
   display:none;
   position:fixed;
@@ -35,7 +34,6 @@ body { margin:0; font-family:'Roboto',sans-serif; background:#f4f6f9; display:fl
 
 .main { flex:1; padding:30px; }
 
-/* CARDS */
 .cards { 
   display:grid; 
   grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); 
@@ -57,25 +55,11 @@ table { width:100%; border-collapse:collapse; }
 th, td { border:1px solid #ddd; padding:10px; text-align:center; }
 th { background:#0f1b4c; color:white; }
 
-/* MOBILE */
 @media(max-width:768px){
   .menu-btn{ display:block; }
-
-  .sidebar{
-    position:fixed;
-    left:-250px;
-    top:0;
-    z-index:1000;
-  }
-
-  .sidebar.active{
-    left:0;
-  }
-
-  .main{
-    width:100%;
-    padding:15px;
-  }
+  .sidebar{ position:fixed; left:-250px; top:0; z-index:1000; }
+  .sidebar.active{ left:0; }
+  .main{ width:100%; padding:15px; }
 }
 
 #toast{
@@ -154,6 +138,10 @@ th { background:#0f1b4c; color:white; }
 <script>
 let students = JSON.parse(localStorage.getItem("students")) || [];
 
+function getToday(){
+    return new Date().toISOString().split('T')[0];
+}
+
 function toggleMenu(){
     document.querySelector(".sidebar").classList.toggle("active");
 }
@@ -226,21 +214,13 @@ function saveAttendance(){
 
     localStorage.setItem("attendance", JSON.stringify(attendance));
 
-    let csvContent = "data:text/csv;charset=utf-8," + csvData.map(e=>e.join(",")).join("\n");
-    let link = document.createElement("a");
-    link.href = encodeURI(csvContent);
-    link.download = `attendance_${getDateTime().excelDate}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    showToast("Attendance Saved & Downloaded ✅");
+    showToast("Attendance Saved ✅");
     updateDashboard();
 }
 
 function updateDashboard(){
     let attendance = JSON.parse(localStorage.getItem("attendance")) || [];
-    let today = getDateTime().date;
+    let today = getToday();
 
     let todayAttendance = attendance.filter(a => a.date === today);
 
@@ -251,13 +231,14 @@ function updateDashboard(){
 
     let total = students.length;
     let present = unique.filter(a => a.status === "Present").length;
-    let absent = total - present;
+    let absent = unique.filter(a => a.status === "Absent").length;
+    let notDetected = total - (present + absent);
 
     document.getElementById("totalStudents").innerText = total;
     document.getElementById("presentToday").innerText = present;
     document.getElementById("absentToday").innerText = absent;
     document.getElementById("detected").innerText = present;
-    document.getElementById("notDetected").innerText = absent;
+    document.getElementById("notDetected").innerText = notDetected;
 }
 
 window.addEventListener("focus", updateDashboard);
